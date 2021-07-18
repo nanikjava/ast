@@ -86,7 +86,6 @@ func fix(dir string) {
 }
 
 func main() {
-	//fix("/home/nanik/GolandProjects/gopath/src/github.com/ory/kratos")
 	traverse("/home/nanik/GolandProjects/gopath/src/github.com/ory/kratos")
 }
 
