@@ -11,12 +11,6 @@ import (
 	"io/ioutil"
 )
 
-func FormatNode(node ast.Node) string {
-	buf := new(bytes.Buffer)
-	_ = format.Node(buf, token.NewFileSet(), node)
-	return buf.String()
-}
-
 func fix(dir string) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, nil, parser.ParseComments)
@@ -28,7 +22,6 @@ func fix(dir string) {
 		for fileName, file := range pkg.Files {
 			fmt.Printf("working on file %v\n", fileName)
 			ast.Inspect(file, func(n ast.Node) bool {
-				// perform analysis here
 				fn, ok := n.(*ast.FuncDecl)
 				if ok {
 					fmt.Printf("fn: %v\n", fn.Name.Name)
@@ -37,17 +30,20 @@ func fix(dir string) {
 						fDeclaration, ok := fn.Name.Obj.Decl.(*ast.FuncDecl)
 						if ok {
 							if len(fDeclaration.Type.Params.List) > 0 {
+								// how many parameters are there
 								fmt.Println("Len param  = ", len(fDeclaration.Type.Params.List))
 
 								for _, k := range fDeclaration.Type.Params.List {
 									if len(k.Names) > 0 {
 										fmt.Println(". parameter name = ", k.Names[0])
 
+										// is it function type ?
 										fType, ok := k.Type.(*ast.FuncType)
 										if fType != nil && ok {
 											fmt.Println(".... parameter type (function) = ", fType.Params.List, " with ", len(fType.Params.List), " parameters ")
 										}
 
+										// is it a selector type ?
 										fSelectorExpr, ok := k.Type.(*ast.SelectorExpr)
 										if fSelectorExpr != nil && ok {
 											fIdent, ok := fSelectorExpr.X.(*ast.Ident)
@@ -56,9 +52,9 @@ func fix(dir string) {
 											}
 										}
 
+										// ..or just a nomal type ?
 										fIdent, ok := k.Type.(*ast.Ident)
 										if ok {
-
 											if fIdent != nil && fIdent.Obj != nil && ok {
 												fmt.Println(".... parameter type = ", fIdent.Obj.Name)
 											} else {
